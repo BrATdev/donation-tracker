@@ -3,7 +3,7 @@
 {% load i18n %}
 
 
-{% block title %}{% trans "Run Detail" %} -- {{ event.name }}{% endblock %}
+{% block title %}{% trans "Detalhes da Run" %} -- {{ event.name }}{% endblock %}
 
 {% block content %}
 	<h2 class="text-center">
@@ -11,7 +11,7 @@
 	</h2>
 
   {% if run.description %}
-	<h3 class="text-gdq-black">{% trans "Description" %}</h3>
+	<h3 class="text-gdq-black">{% trans "Descrição" %}</h3>
 
 	<table class="table table-condensed table-striped small">
 
@@ -39,22 +39,22 @@
 
   {% if bids %}
     <h3 class="text-gdq-black">
-      {% trans "Bids" %}
+      {% trans "Incentivos" %}
     </h3>
     <table  class="table table-condensed table-striped small">
 	<thead>
       <tr>
         <th colspan="3">
-          {% trans "Name" %}
+          {% trans "Nome" %}
         </th>
         <th>
-          {% trans "Description" %}
+          {% trans "Descrição" %}
         </th>
         <th>
-          {% trans "Amount" %}
+          {% trans "Valor" %}
         </th>
         <th>
-          {% trans "Goal" %}
+          {% trans "Meta" %}
         </th>
       </tr>
 	</thead>
@@ -63,6 +63,6 @@
       {% endfor %}
     </table>
 	{% endif %}
-	<p align="center"><a href="{% url 'tracker.views.runindex' event=event.short %}">{% trans "Back to Run Index" %}</a></p>
+	<p align="center"><a href="{% url 'tracker.views.runindex' event=event.short %}">{% trans "Voltar à Lista de Runs" %}</a></p>
 	{% include "tracker/navfooter.html" %}
 {% endblock %}

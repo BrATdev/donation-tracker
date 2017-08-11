@@ -3,7 +3,7 @@
 {% load i18n %}
 
 {% block title %}
-    Registration
+    Registro / Registration
 {% endblock %}
 
 {% block content %}
@@ -11,10 +11,12 @@
 {% if message %}<p><h3>{{ message }}</h3></p>{% endif %}
 
 <p>
+Se você já possuir uma conta, você pode fazer <a href="{% url 'login' %}">log in</a>. Se você precisa resetar sua senha, por favor use <a href="{% url 'password_reset' %}">este</a> formulário.
 If you already have an account you can <a href="{% url 'login' %}">log in</a>. If you need to reset your password, please use <a href="{% url 'password_reset' %}">this</a> form.
 </p>
 
 <p>
+Por favor insira seu endereço de e-mail. Nós vamos te enviar um link para registro assim que possível.
 Please enter your e-mail address. We will send you a registration link as soon as we can.
 {% standardform form "registerform" "Send Email" %}
 </p>

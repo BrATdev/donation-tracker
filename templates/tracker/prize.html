@@ -3,27 +3,27 @@
 {% load i18n %}
 
 
-{% block title %}{% trans "Prize Detail" %} -- {{ event.name|title }}{% endblock %}
+{% block title %}{% trans "Detalhes do Prêmio" %} -- {{ event.name|title }}{% endblock %}
 
 {% block content %}
 	<div class="title">
 		<b>
-			{% trans "Prize" %}:
+			{% trans "Prêmio" %}:
 		</b>
 		{{ prize.name|title }}
 		<b>
-			{% trans "Minimum Bid" %}:
+			{% trans "Doação Mínima" %}:
 		</b>
 		{{ prize.minimumbid|money }}
 		{% if category %}
 		<b>
-			{% trans "Category" %}:
+			{% trans "Categoria" %}:
 		</b>
 			{{ category }}
 		{% endif %}
 		{% if prize.image %}
 		<b>
-			{% trans "Image" %}:
+			{% trans "Imagem" %}:
 		</b>
 		<a href="{{ prize.image }}">{% trans "Link" %}</a>
 		{% endif %}
@@ -31,7 +31,7 @@
   {% if prize.get_winners %}
     <table>
       <th>
-        {% trans "Winner(s)" %}
+        {% trans "Vencedor(es)" %}
       </th>
       {% for winner in prize.get_winners %}
         <tr>
@@ -48,7 +48,7 @@
   {% if prize.provider %}
 	<table>
       <th>
-        {% trans "Contributed By" %}
+        {% trans "Doado Por" %}
       </th>
       <tr>
         <td>
@@ -61,7 +61,7 @@
 	<table>
 		<tr>
 			<th align="center">
-				{% trans "Games" %}
+				{% trans "Jogos" %}
 			</th>
 		</tr>
 		{% for game in games %}
@@ -80,7 +80,7 @@
 		<tr>
 			<th align="center">
 				<b>
-					{% trans "Description" %}
+					{% trans "Descrição" %}
 				</b>
 			</th>
 		</tr>
@@ -91,6 +91,6 @@
 		</tr>
 	</table>
   {% endif %}
-	<p align="center"><a href="{% url 'tracker.views.prizeindex' event=prize.event.short %}">{% trans "Back to Prize Index" %}</a></p>
+	<p align="center"><a href="{% url 'tracker.views.prizeindex' event=prize.event.short %}">{% trans "Voltar à Lista de Prêmios" %}</a></p>
 	{% include "tracker/navfooter.html" %}
 {% endblock %}
