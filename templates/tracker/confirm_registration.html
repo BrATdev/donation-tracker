@@ -4,7 +4,7 @@
 {% load donation_tags %}
 
 {% block title %}
-  Tracker Registration Confirmation
+  Confirmação de Registro no Tracker
 {% endblock %}
 
 {% block nav %}
@@ -12,13 +12,13 @@
 
 {% block content %}
   {% if not formuser %}
-    <p> ERROR: No such user exists.</p>
+    <p> ERRO: Usuário não existe.</p>
   {% elif formuser.is_active == True %}
-    <p> ERROR: User account is already active.</p>
+    <p> ERRO: Conta de usuário já está ativa.</p>
   {% elif not tokenmatches %}
-    <p> ERROR: You must provide a valid auth token.</p>
+    <p> ERRO: Você precisa possuir um token de autenticação válido.</p>
   {% else %}
-    <p>Please set your username and password.</p>
+    <p>Por favor insira seu username e senha.</p>
     {% standardform form "form" "Submit" %}
   {% endif %}
 {% endblock %}

@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.conf.urls import patterns, url
-from django.core.exceptions import ImproperlyConfigured, PermissionDenied
+from django.core.exceptions import ImproperlyConfigured
 from django.core.urlresolvers import reverse
 from django.utils.html import escape
 from django.utils.text import Truncator
@@ -258,12 +258,11 @@ class BidAdmin(CustomModelAdmin):
   def has_add_permission(self, request):
     return request.user.has_perm('tracker.top_level_bid')
   def has_change_permission(self, request, obj=None):
-    return super(BidAdmin, self).has_change_permission(request, obj) and \
-      (obj == None or request.user.has_perm('tracker.can_edit_locked_events') or not obj.event.locked)
+    return obj == None or request.user.has_perm('tracker.can_edit_locked_events') or not obj.event.locked
   def has_delete_permission(self, request, obj=None):
-    return super(BidAdmin, self).has_delete_permission(request, obj) and \
-      (obj == None or ((request.user.has_perm('tracker.can_edit_locked_events') or not obj.event.locked) and
-       (request.user.has_perm('tracker.delete_all_bids') or not obj.total)))
+    return obj == None or \
+       ((request.user.has_perm('tracker.can_edit_locked_events') or not obj.event.locked) and \
+        (request.user.has_perm('tracker.delete_all_bids') or not obj.total))
   def merge_bids(self, request, queryset):
     bids = queryset
     for bid in bids:
@@ -323,6 +322,10 @@ class DonationBidInline(CustomStackedInline):
   max_num=100
   readonly_fields = ('edit_link',)
 
+class DonationBidForm(djforms.ModelForm):
+  bid = make_ajax_field(tracker.models.DonationBid, 'bid', 'bidtarget')
+  donation = make_ajax_field(tracker.models.DonationBid, 'donation', 'donation')
+
 class DonationBidAdmin(CustomModelAdmin):
   form = DonationBidForm
   list_display = ('bid', 'donation', 'amount')
@@ -371,7 +374,7 @@ class DonationAdmin(CustomModelAdmin):
     ('Comment State', {'fields': ('comment', 'modcomment')}),
     ('Donation State', {'fields': (('transactionstate', 'bidstate', 'readstate', 'commentstate'),)}),
     ('Financial', {'fields': (('amount', 'fee', 'currency', 'testdonation'),)}),
-    ('Extra Donor Info', {'fields': (('requestedvisibility', 'requestedalias', 'requestedemail','requestedsolicitemail'),)}),
+    ('Extra Donor Info', {'fields': (('requestedvisibility', 'requestedalias', 'requestedemail'),)}),
     ('Other', {'fields': (('domain', 'domainId'),)}),
   ]
   def visible_donor_name(self, obj):
@@ -427,11 +430,9 @@ class DonationAdmin(CustomModelAdmin):
         ret.append('currency')
     return ret
   def has_change_permission(self, request, obj=None):
-    return super(DonationAdmin, self).has_change_permission(request, obj) and \
-           (obj == None or request.user.has_perm('tracker.can_edit_locked_events') or not obj.event.locked)
+    return obj == None or request.user.has_perm('tracker.can_edit_locked_events') or not obj.event.locked
   def has_delete_permission(self, request, obj=None):
-    return super(DonationAdmin, self).has_delete_permission(request, obj) and \
-           (obj == None or obj.domain == 'LOCAL' or request.user.has_perm('tracker.delete_all_donations'))
+    return obj == None or obj.domain == 'LOCAL' or request.user.has_perm('tracker.delete_all_donations')
   def get_queryset(self, request):
     event = viewutil.get_selected_event(request)
     params = {}
@@ -534,7 +535,7 @@ class DonorForm(djforms.ModelForm):
   class Meta:
     model = tracker.models.Donor
     exclude = ('', '')
-
+  
 class DonorAdmin(CustomModelAdmin):
   form = DonorForm
   search_fields = ('email', 'paypalemail', 'alias', 'firstname', 'lastname')
@@ -542,7 +543,7 @@ class DonorAdmin(CustomModelAdmin):
   readonly_fields = ('visible_name',)
   list_display = ('__unicode__', 'visible_name', 'alias', 'visibility')
   fieldsets = [
-    (None, { 'fields': ['email', 'alias', 'firstname', 'lastname', 'visibility', 'visible_name', 'user', 'solicitemail'] }),
+    (None, { 'fields': ['email', 'alias', 'firstname', 'lastname', 'visibility', 'visible_name', 'user'] }),
     ('Donor Info', {
       'classes': ['collapse'],
       'fields': ['paypalemail']
@@ -596,16 +597,11 @@ class EventForm(djforms.ModelForm):
     class Meta:
         model = tracker.models.Event
         exclude = ('', '')
-
-class EventBidInline(BidInline):
-  def get_queryset(self, request):
-    qs =  super(EventBidInline, self).get_queryset(request)
-    return qs.filter(speedrun=None)
-
+  
 class EventAdmin(CustomModelAdmin):
   form = EventForm
   search_fields = ('short', 'name')
-  inlines = [EventBidInline]
+  inlines = [BidInline]
   list_display = ['name', 'locked']
   list_editable = ['locked']
   fieldsets = [
@@ -686,7 +682,7 @@ class PrizeInline(CustomStackedInline):
 
 class PrizeAdmin(CustomModelAdmin):
   form = PrizeForm
-  list_display = ('name', 'category', 'bidrange', 'games', 'start_draw_time', 'end_draw_time', 'sumdonations', 'randomdraw', 'event', 'winners_', 'provider', 'handler' )
+  list_display = ('name', 'category', 'bidrange', 'games', 'starttime', 'endtime', 'sumdonations', 'randomdraw', 'event', 'winners_', 'provider', 'handler' )
   list_filter = ('event', 'category', 'state', PrizeListFilter)
   fieldsets = [
     (None, { 'fields': ['name', 'description', 'shortdescription', 'image', 'altimage', 'event', 'category', 'requiresshipping', 'handler' ] }),
@@ -770,7 +766,7 @@ class PrizeTicketForm(djforms.ModelForm):
   class Meta:
     model = tracker.models.PrizeTicket
     exclude = ('', '')
-
+    
 class PrizeTicketAdmin(CustomModelAdmin):
   form = PrizeTicketForm
   list_display = ('prize', 'donation', 'amount')
@@ -788,13 +784,13 @@ class RunnerAdminForm(djforms.ModelForm):
   class Meta:
     model = tracker.models.Runner
     exclude = ('', '')
-
+    
 class RunnerAdmin(CustomModelAdmin):
   form = RunnerAdminForm
   search_fields = ['name', 'stream', 'twitter', 'youtube', 'donor__alias', 'donor__firstname', 'donor__lastname', 'donor__email',]
   list_display = ('name', 'stream', 'twitter', 'youtube', 'donor',)
   fieldsets = [(None, { 'fields': ('name', 'stream', 'twitter', 'youtube', 'donor',) }),]
-
+    
 class SpeedRunAdminForm(djforms.ModelForm):
   event = make_ajax_field(tracker.models.SpeedRun, 'event', 'event', initial=latest_event_id)
   runners = make_ajax_field(tracker.models.SpeedRun, 'runners', 'runner')
@@ -802,58 +798,14 @@ class SpeedRunAdminForm(djforms.ModelForm):
     model = tracker.models.SpeedRun
     exclude = ('', '')
 
-
-class StartRunForm(djforms.Form):
-  run_time = djforms.CharField(help_text='Run time of previous run')
-  start_time = djforms.DateTimeField(help_text='Start time of current run')
-
-def start_run_view(request, run):
-  if not request.user.has_perm('tracker.change_speedrun'):
-    raise PermissionDenied
-  run = tracker.models.SpeedRun.objects.get(id=run)
-  prev = tracker.models.SpeedRun.objects.filter(event=run.event, order__lt=run.order).last()
-  form = StartRunForm(data=request.POST if request.method == 'POST' else None,initial={'run_time': prev.run_time, 'start_time': run.starttime})
-  if form.is_valid():
-    rt = tracker.models.event.TimestampField.time_string_to_int(form.cleaned_data['run_time'])
-    endtime = prev.starttime + timedelta(milliseconds=rt)
-    if form.cleaned_data['start_time'] < endtime:
-      return HttpResponse('Nope', status=400)
-    prev.run_time = form.cleaned_data['run_time']
-    prev.setup_time = str(form.cleaned_data['start_time'] - endtime)
-    prev.save()
-    messages.info(request, 'Previous run time set to %s' % prev.run_time)
-    messages.info(request, 'Previous setup time set to %s' % prev.setup_time)
-    run.refresh_from_db()
-    messages.info(request, 'Current start time is %s' % run.starttime)
-    return HttpResponseRedirect(reverse('admin:tracker_speedrun_changelist') + '?event=%d' % run.event_id)
-  return render(request, 'admin/generic_form.html',
-                dictionary=dict(
-                  title=u'Set start time for %s' % run,
-                  form=form,
-                  action=request.path,
-                )
-                )
-
 class SpeedRunAdmin(CustomModelAdmin):
   form = SpeedRunAdminForm
   search_fields = ['name', 'description', 'runners__name', ]
   list_filter = ['event', RunListFilter]
   inlines = [BidInline,PrizeInline]
   list_display = ('name', 'category', 'description', 'deprecated_runners', 'starttime', 'run_time', 'setup_time')
-  fieldsets = [(None, { 'fields': ('name', 'display_name', 'category', 'console', 'release_year', 'description', 'event', 'starttime', 'run_time', 'setup_time', 'deprecated_runners', 'runners', 'coop', 'tech_notes',) }),]
+  fieldsets = [(None, { 'fields': ('name', 'display_name', 'category', 'console', 'release_year', 'description', 'event', 'starttime', 'run_time', 'setup_time', 'deprecated_runners', 'runners') }),]
   readonly_fields = ('deprecated_runners', 'starttime')
-  actions = ['start_run']
-
-  def start_run(self, request, runs):
-    if len(runs) != 1:
-      self.message_user(request, 'Pick exactly one run.', level=messages.ERROR)
-    elif not runs[0].order:
-      self.message_user(request, 'Run has no order.', level=messages.ERROR)
-    elif runs[0].order == 1:
-      self.message_user(request, 'Run is first run.', level=messages.ERROR)
-    else:
-      return HttpResponseRedirect(settings.SITE_PREFIX + 'admin/start_run/' + str(runs[0].id))
-
   def get_queryset(self, request):
     event = viewutil.get_selected_event(request)
     params = {}
@@ -911,8 +863,7 @@ class AdminActionLogEntryAdmin(CustomModelAdmin):
   search_fields = ['object_repr', 'change_message']
   date_hierarchy = 'action_time'
   list_filter = [('action_time', admin.DateFieldListFilter), 'user', AdminActionLogEntryFlagFilter]
-  readonly_fields = ('action_time', 'content_type', 'object_id', 'object_repr', 'action_type',
-                     'action_flag', 'target_object', 'change_message', 'user')
+  readonly_fields = ['action_time', 'content_type', 'object_id', 'object_repr', 'action_type', 'action_flag', 'target_object']
   fieldsets = [
     (None, {'fields': ['action_type', 'action_time', 'user', 'change_message', 'target_object']})
   ]
@@ -1128,7 +1079,6 @@ def get_urls():
                   url('select_event', select_event, name='select_event'),
                   url('merge_bids', merge_bids_view, name='merge_bids'),
                   url('merge_donors', merge_donors_view, name='merge_donors'),
-                  url('start_run/(?P<run>\d+)', start_run_view, name='start_run'),
                   url('automail_prize_contributors', automail_prize_contributors, name='automail_prize_contributors'),
                   url('draw_prize_winners', draw_prize_winners, name='draw_prize_winners'),
                   url('automail_prize_winners', automail_prize_winners, name='automail_prize_winners'),

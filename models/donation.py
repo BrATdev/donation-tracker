@@ -4,14 +4,12 @@ from django.db import models
 from django.db.models import signals
 from django.db.models import Count,Sum,Max,Avg
 from django.core.exceptions import ValidationError
-from django.core.urlresolvers import reverse
 from django.dispatch import receiver
 from django.contrib.auth.models import User
-from django.utils import timezone
-
 from .event import LatestEvent
 from .fields import OneToOneOrNoneField
 from ..validators import *
+from django.utils import timezone
 
 try:
   import cld
@@ -60,7 +58,6 @@ class Donation(models.Model):
   requestedvisibility = models.CharField(max_length=32, null=False, blank=False, default='CURR', choices=(('CURR', 'Use Existing (Anonymous if not set)'),) + DonorVisibilityChoices, verbose_name='Requested Visibility')
   requestedalias = models.CharField(max_length=32, null=True, blank=True, verbose_name='Requested Alias')
   requestedemail = models.EmailField(max_length=128, null=True, blank=True, verbose_name='Requested Contact Email')
-  requestedsolicitemail = models.CharField(max_length=32, null=False, blank=False, default='CURR', choices=(('CURR', 'Use Existing (Opt Out if not set)'),('OPTOUT', 'Opt Out'), ('OPTIN','Opt In')), verbose_name='Requested Charity Email Opt In')
   commentlanguage = models.CharField(max_length=32, null=False, blank=False, default='un', choices=LanguageChoices, verbose_name='Comment Language')
   class Meta:
     app_label = 'tracker'
@@ -86,23 +83,23 @@ class Donation(models.Model):
     if self.domain == 'LOCAL': # local donations are always complete, duh
       if not self.donor:
         raise ValidationError('Local donations must have a donor')
-      self.transactionstate = 'COMPLETED'
+      self.transacationstate = 'COMPLETED'
     if not self.donor and self.transactionstate != 'PENDING':
       raise ValidationError('Donation must have a donor when in a non-pending state')
     if not self.domainId and self.donor and self.timereceived:
       self.domainId = str(calendar.timegm(self.timereceived.timetuple())) + self.donor.email
-
+    
     bids = set(self.bids.all())
-
+    
     # because non-saved bids will not have an id, they are not hashable, so we have to special case them
     if bid:
       if not bid.id:
         bids = list(bids) + [bid]
       else:
         #N.B. the order here is very important, as we want the new copy of bid to override the old one (if present)
-        bids = list({bid} | bids)
-
-    bids = map(lambda b: b.amount or 0,bids)
+        bids = list(set([bid]) | bids)
+        
+    bids = map(lambda b: b.amount,bids)
     bidtotal = reduce(lambda a,b: a+b,bids,Decimal('0'))
     if self.amount and bidtotal > self.amount:
       raise ValidationError('Bid total is greater than donation amount: %s > %s' % (bidtotal,self.amount))
@@ -143,7 +140,7 @@ class Donor(models.Model):
   lastname = models.CharField(max_length=64,blank=True,verbose_name='Last Name')
   visibility = models.CharField(max_length=32, null=False, blank=False, default='FIRST', choices=DonorVisibilityChoices)
   user = OneToOneOrNoneField(User, null=True, blank=True)
-
+  
   # Address information, yay!
   addresscity = models.CharField(max_length=128,blank=True,null=False,verbose_name='City')
   addressstreet = models.CharField(max_length=128,blank=True,null=False,verbose_name='Street/P.O. Box')
@@ -153,7 +150,6 @@ class Donor(models.Model):
 
   # Donor specific info
   paypalemail = models.EmailField(max_length=128,unique=True,null=True,blank=True,verbose_name='Paypal Email')
-  solicitemail = models.CharField(max_length=32,choices=(('CURR', 'Use Existing (Opt Out if not set)'),('OPTOUT', 'Opt Out'), ('OPTIN','Opt In')),default='CURR')
 
   class Meta:
     app_label = 'tracker'
@@ -194,9 +190,6 @@ class Donor(models.Model):
   def full(self):
     return unicode(self.email) + u' (' + unicode(self) + u')'
 
-  def get_absolute_url(self, event=None):
-    return reverse('tracker.views.donor', args=(self.id,event.id) if event and event.id else (self.id,))
-
   def __repr__(self):
     return self.visible_name().encode('utf-8')
 
@@ -220,8 +213,7 @@ class DonorCache(models.Model):
   @receiver(signals.post_save, sender=Donation)
   @receiver(signals.post_delete, sender=Donation)
   def donation_update(sender, instance, **args):
-    if not instance.donor:
-      return
+    if not instance.donor: return
     cache,c = DonorCache.objects.get_or_create(event=instance.event,donor=instance.donor)
     cache.update()
     if cache.donation_count:
@@ -267,9 +259,6 @@ class DonorCache(models.Model):
   @property
   def visibility(self):
     return self.donor.visibility
-
-  def get_absolute_url(self, event=None):
-    return self.donor.get_absolute_url(event)
 
   class Meta:
     app_label = 'tracker'

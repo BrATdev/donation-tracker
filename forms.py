@@ -96,7 +96,7 @@ class DonationEntryForm(forms.Form):
         super(DonationEntryForm, self).__init__(*args, **kwargs)
         minDonationAmount = event.minimumdonation if event != None else Decimal(
             "1.00")
-        self.fields['amount'] = forms.DecimalField(decimal_places=2, min_value=minDonationAmount, max_value=Decimal("100000"),  label="Donation Amount (min ${0})".format(
+        self.fields['amount'] = forms.DecimalField(decimal_places=2, min_value=minDonationAmount, label="Donation Amount (min ${0})".format(
             minDonationAmount), widget=tracker.widgets.NumberInput(attrs={'id': 'iDonationAmount', 'min': str(minDonationAmount), 'step': '0.01'}), required=True)
         self.fields['comment'] = forms.CharField(
             widget=forms.Textarea, required=False)
@@ -106,8 +106,6 @@ class DonationEntryForm(forms.Form):
             max_length=32, label='Preferred Alias', required=False)
         self.fields['requestedemail'] = forms.EmailField(
             max_length=128, label='Preferred Email', required=False)
-        self.fields['requestedsolicitemail'] = forms.ChoiceField(
-            initial='CURR', choices=models.Donation._meta.get_field('requestedsolicitemail').choices, label='Charity Email Opt In')
 
     def clean(self):
         if self.cleaned_data['requestedvisibility'] == 'ALIAS' and not self.cleaned_data['requestedalias']:
@@ -362,6 +360,8 @@ class PrizeSubmissionForm(forms.Form):
                                 help_text="Enter any additional information you feel the staff should know about your prize. This information will not be made public. ")
     estimatedvalue = forms.DecimalField(decimal_places=2, max_digits=20, required=False, label='Estimated Value', validators=[positive, nonzero],
                                         help_text="Estimate the actual value of the prize. If the prize is handmade, use your best judgement based on time spent creating it. Note that this is not the bid amount. Leave blank if you prefer this information not be made public.")
+    suggestedamount = forms.DecimalField(decimal_places=2, max_digits=20, required=False, label='Suggested Minimum Donation', validators=[positive, nonzero],
+                                         help_text="Specify the donation amount (in USD) you believe should enter a donor to win this prize. This amount may be modified by GamesDoneQuick staff at their discretion.")
     imageurl = forms.URLField(max_length=1024, label='Prize Image', required=True,
                               help_text=mark_safe("Enter the URL of an image of the prize. Please see our <a href='imagetips'>additional notes</a> regarding prize images. Images are now required for prize submissions."))
     creatorname = forms.CharField(max_length=64, required=False, label="Prize Creator",
@@ -414,6 +414,12 @@ class PrizeSubmissionForm(forms.Form):
                 "You must agree with this statement to submit a prize.")
         return value
 
+    def clean_suggestedamount(self):
+        amount = self.cleaned_data['suggestedamount']
+        if not amount:
+            amount = Decimal('5.00')
+        return amount
+
     def clean(self):
         if not self.cleaned_data['startrun']:
             self.cleaned_data['startrun'] = self.cleaned_data.get(
@@ -439,8 +445,8 @@ class PrizeSubmissionForm(forms.Form):
             maxwinners=self.cleaned_data['maxwinners'],
             extrainfo=self.cleaned_data['extrainfo'],
             estimatedvalue=self.cleaned_data['estimatedvalue'],
-            minimumbid=5,
-            maximumbid=5,
+            minimumbid=self.cleaned_data['suggestedamount'],
+            maximumbid=self.cleaned_data['suggestedamount'],
             image=self.cleaned_data['imageurl'],
             handler=handler,
             provider=provider,

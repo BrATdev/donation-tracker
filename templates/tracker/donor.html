@@ -7,12 +7,17 @@
 
 {% block content %}
 	<h2 class="text-center">
-		{{ cache.visible_name }}<br />
+		{% name donor %}
+		{% if perms.tracker.view_emails %}
+				{% trans "Email" %}:
+			{% email donor.email %}
+		{% endif %}<br />
 		<small>
 			{% trans "Total Donations" %}:
-		{{ cache.donation_total|money }} ({{ cache.donation_count }}) &mdash;
+		{{ donor.donation_total|money }} ({{ donor.donation_count }})
+&mdash;
 			{% trans "Max/Avg Donation" %}:
-		{{ cache.donation_max|money }}/{{ cache.donation_avg|money }}
+		{{ donor.donation_max|money }}/{{ donor.donation_avg|money }}
 		</small>
 	</h2>
 	<table  class="table table-condensed table-striped small">
@@ -46,7 +51,7 @@
 			<tr class="small">
 				<td colspan="3">
 					{% with donation.comment as comment %}{% with donation.commentstate as state %}
-						{% include "tracker/partials/comment.html" %}
+						{% include "tracker/comment.html" %}
 					{% endwith %}{% endwith %}
 				</td>
 			</tr>
@@ -59,40 +64,40 @@
 	{% endfor %}
 	</table>
 
-	<p align="center"><a href="{% url 'tracker.views.donor' id=cache.donor_id event=event.short %}{{ comments|yesno:',?comments' }}">
-	{% include "tracker/partials/commentslink.html" %}
+	<p align="center"><a href="{% url 'tracker.views.donor' id=donor.donor_id event=event.short %}{{ comments|yesno:',?comments' }}">
+	{% include "tracker/commentslink.html" %}
 	</a></p>
 
-  {% if cache.runneryoutube != None or cache.runnertwitch != None or cache.runnertwitter != None %}
+  {% if donor.runneryoutube != None or donor.runnertwitch != None or donor.runnertwitter != None %}
     <table>
       <tr><th colspan="2">Runner Information</th></tr>
-      {% if cache.runneryoutube != None %}
+      {% if donor.runneryoutube != None %}
         <tr>
           <td>
             Youtube
           </td>
           <td>
-            <a href="http://www.youtube.com/{{ cache.runneryoutube }}">{{ cache.runneryoutube }}</a>
+            <a href="http://www.youtube.com/{{ donor.runneryoutube }}">{{ donor.runneryoutube }}</a>
           </td>
         </tr>
       {% endif %}
-      {% if cache.runnertwitch != None %}
+      {% if donor.runnertwitch != None %}
         <tr>
           <td>
             Twitch
           </td>
           <td>
-            <a href="http://www.twitch.tv/{{ cache.runnertwitch }}">{{ cache.runnertwitch }}</a>
+            <a href="http://www.twitch.tv/{{ donor.runnertwitch }}">{{ donor.runnertwitch }}</a>
           </td>
         </tr>
       {% endif %}
-      {% if cache.runnertwitter != None %}
+      {% if donor.runnertwitter != None %}
         <tr>
           <td>
             Twitter
           </td>
           <td>
-            <a href="http://www.twitter.com/{{ cache.runnertwitter }}">{{ cache.runnertwitter }}</a>
+            <a href="http://www.twitter.com/{{ donor.runnertwitter }}">{{ donor.runnertwitter }}</a>
           </td>
         </tr>
       {% endif %}
@@ -100,5 +105,5 @@
   {% endif %}
 
 	<p align="center"><a href="{% url 'tracker.views.donorindex' event=event.short %}">{% trans "Back to Donor Index" %}</a></p>
-	{% include "tracker/partials/navfooter.html" %}
+	{% include "tracker/navfooter.html" %}
 {% endblock %}

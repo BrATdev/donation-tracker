@@ -3,14 +3,14 @@
 {% load i18n %}
 
 
-{% block title %}{% trans "Run Index" %} -- {{ event.name }}{% endblock %}
+{% block title %}{% trans "Lista de Runs" %} -- {{ event.name }}{% endblock %}
 
 {% block content %}
 <div class="fa-stack center-block medium-icon-blue fa-5x">
             <i class="fa fa-circle fa-stack-2x"></i> <i class="fa fa-gamepad fa-stack-1x fa-inverse"></i>
         </div>
 	<h2 class="text-center">
-			{% trans "Run Index" %}
+			{% trans "Lista de Runs" %}
 		&mdash;
 		{{ event.name }}
 	</h2>
@@ -18,19 +18,19 @@
 	<thead>
 		<tr>
 			<th>
-				{% trans "Name" %}
+				{% trans "Nome" %}
 			</th>
 			<th>
-				{% trans "Players" %}
+				{% trans "Runners" %}
 			</th>
 			<th>
-				{% trans "Description" %}
+				{% trans "Descrição" %}
 			</th>
 			<th>
-				{% trans "Start Time" %}
+				{% trans "Horário de Início" %}
 			</th>
 			<th>
-				{% trans "End Time" %}
+				{% trans "Horário de Término" %}
 			</th>
 			<th>
 				{% trans "Bid Wars" %}
@@ -56,11 +56,11 @@
 			</td>
 			{% autoescape off %}
 			<td>
-				{% if run.hasbids %}<b>{% trans "Yes" %}</b>{% else %}{% trans "No" %}{% endif %}
+				{% if run.hasbids %}<b>{% trans "Sim" %}</b>{% else %}{% trans "Não" %}{% endif %}
 			</td>
 			{% endautoescape %}
 		</tr>
 	{% endfor %}
 	</table>
-	{% include "tracker/partials/navfooter.html" %}
+	{% include "tracker/navfooter.html" %}
 {% endblock %}

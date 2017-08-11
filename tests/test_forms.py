@@ -1,6 +1,5 @@
 from django.test import TestCase, TransactionTestCase
 from django.contrib.auth import get_user_model
-from django.test import override_settings
 
 AuthUser = get_user_model()
 
@@ -8,11 +7,10 @@ import settings
 
 import tracker.forms
 
-@override_settings(EMAIL_FROM_USER='example@example.com')
 class TestRegistrationForm(TransactionTestCase):
 
     def run_registration(self, email):
-        regForm = tracker.forms.RegistrationForm(data={'email': email, 'from_email': email})
+        regForm = tracker.forms.RegistrationForm(data={'email': email})
         self.assertTrue(regForm.is_valid())
         regForm.save(domain=settings.DOMAIN)
         resultMail = regForm.save(domain=settings.DOMAIN)
@@ -28,7 +26,7 @@ class TestRegistrationForm(TransactionTestCase):
         self.assertEqual(regEmail, userObj.email)
         self.assertFalse(userObj.is_active)
         self.assertFalse(userObj.is_staff)
-
+    
     def testRegisterPersonLongEmail(self):
         regEmail = 'test'*9 + '@anothertest.com'
         userObj = self.run_registration(regEmail)
@@ -36,7 +34,7 @@ class TestRegistrationForm(TransactionTestCase):
         self.assertEqual(regEmail, userObj.email)
         self.assertFalse(userObj.is_active)
         self.assertFalse(userObj.is_staff)
-
+    
     def testClashingRegistrationEmails(self):
         regEmailPrefix = 'prefix'*9
         self.assertLess(30, len(regEmailPrefix))

@@ -21,38 +21,47 @@ class TestPrizeGameRange(TransactionTestCase):
         self.event.save()
         self.eventStart = datetime.datetime.combine(
             self.event.date, datetime.time(hour=12)).replace(tzinfo=pytz.utc)
+        return
 
     def test_prize_range_single(self):
-        runs = randgen.generate_runs(self.rand, self.event, 4, True)
+        runs, eventEnd = randgen.generate_runs(
+            self.rand, self.event, 4, self.eventStart)
         run = runs[1]
         prize = randgen.generate_prize(
             self.rand, event=self.event, startRun=run, endRun=run)
         prizeRuns = prize.games_range()
         self.assertEqual(1, prizeRuns.count())
         self.assertEqual(run.id, prizeRuns[0].id)
+        return
 
     def test_prize_range_pair(self):
-        runs = randgen.generate_runs(self.rand, self.event, 5, True)
+        runs, eventEnd = randgen.generate_runs(
+            self.rand, self.event, 5, self.eventStart)
         startRun = runs[2]
         endRun = runs[3]
-        prize = randgen.generate_prize(self.rand, event=self.event, startRun=startRun, endRun=endRun)
+        prize = randgen.generate_prize(
+            self.rand, event=self.event, startRun=startRun, endRun=endRun)
         prizeRuns = prize.games_range()
         self.assertEqual(2, prizeRuns.count())
         self.assertEqual(startRun.id, prizeRuns[0].id)
         self.assertEqual(endRun.id, prizeRuns[1].id)
+        return
 
     def test_prize_range_gap(self):
-        runs = randgen.generate_runs(self.rand, self.event, 7, True)
+        runs, eventEnd = randgen.generate_runs(
+            self.rand, self.event, 7, self.eventStart)
         runsSlice = runs[2:5]
-        prize = randgen.generate_prize(self.rand, event=self.event, startRun=runsSlice[0], endRun=runsSlice[-1])
+        prize = randgen.generate_prize(
+            self.rand, event=self.event, startRun=runsSlice[0], endRun=runsSlice[-1])
         prizeRuns = prize.games_range()
         self.assertEqual(len(runsSlice), prizeRuns.count())
         for i in range(0, len(runsSlice)):
             self.assertEqual(runsSlice[i].id, prizeRuns[i].id)
+        return
 
     def test_time_prize_no_range(self):
-        runs = randgen.generate_runs(self.rand, self.event, 7, True)
-        eventEnd = runs[-1].endtime
+        runs, eventEnd = randgen.generate_runs(
+            self.rand, self.event, 7, self.eventStart)
         timeA = randgen.random_time(self.rand, self.eventStart, eventEnd)
         timeB = randgen.random_time(self.rand, self.eventStart, eventEnd)
         randomStart = min(timeA, timeB)
@@ -63,6 +72,7 @@ class TestPrizeGameRange(TransactionTestCase):
         self.assertEqual(0, prizeRuns.count())
         self.assertEqual(randomStart, prize.start_draw_time())
         self.assertEqual(randomEnd, prize.end_draw_time())
+        return
 
 
 class TestPrizeDrawingGeneratedEvent(TransactionTestCase):
@@ -75,6 +85,7 @@ class TestPrizeDrawingGeneratedEvent(TransactionTestCase):
             self.rand, self.eventStart, numDonors=100, numRuns=50)
         self.runsList = list(models.SpeedRun.objects.filter(event=self.event))
         self.donorList = list(models.Donor.objects.all())
+        return
 
     def test_draw_random_prize_no_donations(self):
         prizeList = randgen.generate_prizes(
@@ -90,6 +101,7 @@ class TestPrizeDrawingGeneratedEvent(TransactionTestCase):
                     result, message = prizeutil.draw_prize(prize)
                     self.assertFalse(result)
                     self.assertEqual(0, prize.current_win_count())
+        return
 
     def test_draw_prize_one_donor(self):
         startRun = self.runsList[14]
@@ -146,6 +158,7 @@ class TestPrizeDrawingGeneratedEvent(TransactionTestCase):
                     donation.delete()
                     prize.prizewinner_set.all().delete()
                     prize.delete()
+        return
 
     def test_draw_prize_multiple_donors_random_nosum(self):
         startRun = self.runsList[28]
@@ -197,6 +210,7 @@ class TestPrizeDrawingGeneratedEvent(TransactionTestCase):
         self.assertNotEqual(winners[0], winners[1])
         self.assertNotEqual(winners[1], winners[2])
         self.assertNotEqual(winners[0], winners[2])
+        return
 
     def test_draw_prize_multiple_donors_random_sum(self):
         startRun = self.runsList[41]
@@ -263,6 +277,7 @@ class TestPrizeDrawingGeneratedEvent(TransactionTestCase):
         self.assertNotEqual(winners[0], winners[1])
         self.assertNotEqual(winners[1], winners[2])
         self.assertNotEqual(winners[0], winners[2])
+        return
 
     def test_draw_prize_multiple_donors_norandom_nosum(self):
         startRun = self.runsList[25]
@@ -437,19 +452,19 @@ class TestPrizeMultiWin(TransactionTestCase):
         prize.save()
         models.DonorPrizeEntry.objects.create(donor=donor, prize=prize)
         result, msg = prizeutil.draw_prize(prize)
-        self.assertTrue(result, msg)
+        self.assertTrue(result)
         prizeWinner = models.PrizeWinner.objects.get(winner=donor, prize=prize)
         self.assertEquals(1, prizeWinner.pendingcount)
         result, msg = prizeutil.draw_prize(prize)
-        self.assertTrue(result, msg)
+        self.assertTrue(result)
         prizeWinner = models.PrizeWinner.objects.get(winner=donor, prize=prize)
         self.assertEquals(2, prizeWinner.pendingcount)
         result, msg = prizeutil.draw_prize(prize)
-        self.assertTrue(result, msg)
+        self.assertTrue(result)
         prizeWinner = models.PrizeWinner.objects.get(winner=donor, prize=prize)
         self.assertEquals(3, prizeWinner.pendingcount)
         result, msg = prizeutil.draw_prize(prize)
-        self.assertFalse(result, msg)
+        self.assertFalse(result)
 
     def testWinMultiPrizeWithAccept(self):
         donor = randgen.generate_donor(self.rand)
@@ -590,7 +605,7 @@ class TestPrizeCountryFilter(TransactionTestCase):
         self.rand = random.Random(None)
         self.event = randgen.build_random_event(self.rand)
         self.event.save()
-
+        
     def testCountryFilterEvent(self):
         countries = list(models.Country.objects.all()[0:4])
         self.event.allowed_prize_countries.add(countries[0])
@@ -607,7 +622,7 @@ class TestPrizeCountryFilter(TransactionTestCase):
 
         self.assertTrue(prize.is_donor_allowed_to_receive(donors[0]))
         self.assertTrue(prize.is_donor_allowed_to_receive(donors[1]))
-        self.assertFalse(prize.is_donor_allowed_to_receive(donors[2]))
+        self.assertFalse(prize.is_donor_allowed_to_receive(donors[2]))            
         self.assertFalse(prize.is_donor_allowed_to_receive(donors[3]))
         eligible = prize.eligible_donors()
         self.assertEqual(2, len(eligible))
@@ -629,11 +644,11 @@ class TestPrizeCountryFilter(TransactionTestCase):
         self.assertEqual(4, len(eligible))
 
     def testCountryFilterPrize(self):
-        # TODO: fix this so either there's less boilerplate, or the boilerplate is shared
+        # TODO: fix this so either there's less boilerplate, or the boilerplate is shared 
         countries = list(models.Country.objects.all()[0:4])
         prize = models.Prize.objects.create(event=self.event)
         for country in countries[0:3]:
-            self.event.allowed_prize_countries.add(country)
+            self.event.allowed_prize_countries.add(country) 
         self.event.save()
         prize.allowed_prize_countries.add(countries[0])
         prize.allowed_prize_countries.add(countries[1])
@@ -758,7 +773,7 @@ class TestPrizeDrawAcceptOffset(TransactionTestCase):
         result, status = prizeutil.draw_prize(targetPrize)
         prizeWin = models.PrizeWinner.objects.get(prize=targetPrize)
         self.assertEqual(prizeWin.accept_deadline_date(), currentDate + datetime.timedelta(days=self.event.prize_accept_deadline_delta))
-
+        
         prizeWin.acceptdeadline = datetime.datetime.utcnow().replace(tzinfo=pytz.utc) - datetime.timedelta(days=2)
         prizeWin.save()
         self.assertEqual(0, len(targetPrize.eligible_donors()))

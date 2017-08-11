@@ -11,12 +11,20 @@
   {% if message %}<p><h5>{{ message }}</h5></p>{% endif %}
   {% standardform form "formId" "Login" %}
   
-  <p>
+  <!--<p>
   If you need to reset your password, please use <a href="{% url 'password_reset' %}">this</a> form.
+  </p>-->
+
+  <p>
+  Se você precisa resetar sua senha, por favor use <a href="{% url 'password_reset' %}">este</a> formulário.
   </p>
   
-  <p>
+  <!--<p>
   Don't have an account? Register <a href="{% url 'register' %}">here</a> (you will require a valid e-mail address).
+  </p>-->
+
+  <p>
+  Não possui uma conta? Registre-se <a href="{% url 'register' %}">aqui</a> (você vai precisar de um endereço de e-mail válido).
   </p>
 {% endblock %}
 

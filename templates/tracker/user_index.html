@@ -2,39 +2,39 @@
 {% load donation_tags %}
 {% load i18n %}
 
-{% block title %}{% trans "Self Service" %}{% endblock %}
+{% block title %}{% trans "Meu Menu" %}{% endblock %}
 
 {% block content %}
 
-<h3>Self Service Options</h3>
+<h3>Opções do Meu Menu</h3>
 
 {% if not eventList %}
-  There are no events to show
+  Não há eventos para exibir
 {% else %}
 
-<small>(Click an event to expand/contract)</small>
+<small>(Clique em um evento para expandir/encolher)</small>
 
 {% for eventInfo in eventList %}
 <h5><a data-toggle="collapse" href="#{{ eventInfo.event.short}}_div">{{ eventInfo.eventname }} {% if eventInfo.event.locked %}(past event){% endif %}</a></h5>
 <div id="{{ eventInfo.event.short}}_div" class="collapse{% if not eventInfo.event.locked %} in{% endif %}">
   <ul>
   {% if eventInfo.submission %}
-    <li><a href="{% url 'tracker.views.submit_prize' event=eventInfo.eventid %}">Submit prize for {{ eventInfo.eventname }}</a></li>
+    <li><a href="{% url 'tracker.views.submit_prize' event=eventInfo.eventid %}">Enviar prêmio para {{ eventInfo.eventname }}</a></li>
   {% endif %}
   
   {% if eventInfo.prizes %}
-    <li> Prizes you've submitted:
+    <li> Prêmios que você enviou:
       <ul>
       {% for prize in eventInfo.prizes %}
         <li><a href="{% url 'tracker.views.user_prize' prize=prize.id %}">{{ prize.name }}</a>
         {% if prize.state == 'PENDING' %}
-            <small>(pending confirmation)</small>
+            <small>(esperando confirmação)</small>
         {% elif prize.state == 'DENIED' %}
-            <small style="color:red">(Not Accepted)</small>
+            <small style="color:red">(Rejeitado)</small>
         {% elif prize.is_pending_shipping > 0 %}
-            <small>(needs shipping)</small>
+            <small>(aguardando recebimento)</small>
         {% elif prize.is_fully_shipped %}
-            <small>(shipping complete)</small>
+            <small>(recebimento confirmado)</small>
         {% endif %}
         </li>
       {% endfor %}
