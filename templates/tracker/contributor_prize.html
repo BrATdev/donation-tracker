@@ -10,11 +10,11 @@
 
 {% if prize.state == 'PENDING' %}
   <p>
-  This prize is still pending acceptance for the event.
+  Este prêmio ainda está sendo verificado.
   </p>
 {% elif prize.state == 'DENIED' %}
   <p>
-  Unfortunately we were not able to accept this prize.
+  Infelizmente, o prêmio foi negado.
   </p>
 {% endif %}
 
@@ -67,7 +67,7 @@
 {% if pendingWinners %}
   <p>There {{ pendingWinners.count|pluralize:"is,are" }} {{ pendingWinners.count }} {% if formset %}additional {% endif %}pending winner{{ pendingWinners.count|pluralize:"s" }} for this prize.</p>
 {% elif not formset %}
-  <p>There are currently no winners for this prize.</p>
+  <p>Não há vencedores para este prêmio.</p>
 {% endif %}
 
 {% endif %}

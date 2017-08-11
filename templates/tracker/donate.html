@@ -4,7 +4,7 @@
 
 
 {% block title %}
-        {{ event.name|title }} -- Donate
+        {{ event.name|title }} -- Doar / Donate
 {% endblock %}
 
 {% block head %}
@@ -57,7 +57,7 @@
         text += parents[i]['name'];
 
         if (parents[i]['description']) {
-          text += "<br />Description: " + parents[i]['description'];
+          text += "<br />Descrição / Description: " + parents[i]['description'];
         }
       }
 
@@ -184,7 +184,7 @@
           {
             if ($(amountInput).val() <= 0) {
               enoughBidMoney = false;
-              window.alert("Please enter a positive amount to put towards this bid.");
+              window.alert("Por favor insira um valor positivo neste incentivo / Please enter a positive amount for this bid.");
               return false;
             }
           }
@@ -213,12 +213,12 @@
           else {
             if ($(amountInput).val() < 0) {
               enoughPrizeMoney = false;
-              window.alert("Please enter a non-negative amount.");
+              window.alert("Por favor insira um valor não-negativo / Please enter a non-negative amount.");
               return false;
             }
             else if (!prize['sumdonations'] && $(amountInput).val() < prize['minimumbid']) {
               enoughPrizeMoney = false;
-              window.alert("Must donate at least $" + String(prize['minimumbid']) + " to be eligible for " + prize['name']);
+              window.alert("É necessário doar no mínimo (Must donate at least) $" + String(prize['minimumbid']) + " para ser elegível para (to be eligible for) " + prize['name']);
               return false;
             }
           }
@@ -233,27 +233,27 @@
 
       if (visibility == "ALIAS" && !alias)
       {
-        window.alert("Must provide an alias when selecting alias only visibility");
+        window.alert("Insira um apelido para usar a visibilidade somente apelido. Must provide an alias when selecting alias only visibility");
         return false;
       }
 
       if (!validBidsAmount) {
-        window.alert("Must input an amount to assign to the bid.");
+        window.alert("Insira um valor para colocar no incentivo. Must input an amount to assign to the bid.");
         return false;
       }
 
       if (!validPrizeAmount) {
-        window.alert("Must input an amount to assign to the prize.");
+        window.alert("Insira um valor para colocar no prêmio. Must input an amount to assign to the prize.");
         return false;
       }
 
       if (!validBids) {
-        window.alert("Must select a bid.");
+        window.alert("Selecione um incentivo. Must select a bid.");
         return false;
       }
 
       if (!validPrize) {
-        window.alert("Must select a prize.");
+        window.alert("Selecione um prêmio. Must select a prize.");
         return false;
       }
 
@@ -266,12 +266,12 @@
       }
 
       if (isNaN(donationTotal) || donationTotal <= 0) {
-        window.alert("Donation value must be a positive number.");
+        window.alert("O valor de doação precisa ser positivo. Donation value must be a positive number.");
         return false;
       }
 
       if (totalBidsAllocated > donationTotal) {
-        window.alert("Total allocated must be less than donation amount.");
+        window.alert("O total alocado precisa ser menor que o valor da doação. Total allocated must be less than donation amount.");
         return false;
       }
 
@@ -355,21 +355,25 @@
 
 <div id="container">
 
-		<h1>Donations for {{event.name}}</h1>
-		<p>Thank you for donating during the {{event.name}} event! Please read the instructions carefully, as they have changed from previous events. </p>
+		<h1>Doações para {{event.name}} / Donations for {{event.name}}</h1>
+		<p>Obrigado por doar durante o evento {{event.name}}! Por favor leia as instruções com atenção, pois elas foram atualizadas.
+
+    Thank you for donating during the {{event.name}} event! Please read the instructions carefully, as they have changed from previous events. </p>
 		<br />
 		<br />
 
 		{% if prizes %}
-		<h1>Prizes you are eligible for right now:</h1>
+		<h1>Prêmios para os quais você está elegível: / Prizes you are eligible for right now:</h1>
 		<table style="border: 1">
-			<tr><th>Prize</th><th>Image</th><th>Minimum</th></tr>
+			<tr><th>Prêmio/Prize</th><th>Imagem/Image</th><th>Mínimo/Minimum</th></tr>
 			{% for prize in prizes %}
 				<tr><td>{{ prize }}</td><td>{% if prize.image %}<a href="{{ prize.image }}">Link</a>{% endif %}</td><td>{{ prize.minimumbid|money }}</td></tr>
 			{% endfor %}
 		</table>
 		<br />
-		<p>No donation necessary for a chance to win. See <a target="_blank" href="https://gamesdonequick.com/sweepstakes">sweepstakes rules</a> for details and instructions.</p>
+		<p>Não é necessária uma doação para concorrer. Veja as <a target="_blank" href="https://gamesdonequick.com/sweepstakes">regras de sorteio</a> para detalhes e instruções.
+
+    No donation necessary for a chance to win. See <a target="_blank" href="https://gamesdonequick.com/sweepstakes">sweepstakes rules</a> for details and instructions.</p>
 		{% endif %}
 		<br />
 
@@ -377,8 +381,10 @@
   {% csrf_token %}
 
   <div id="left">
-    <h2>Your donation</h2>
-    <p>Note that donations may take several minutes to be collected! Using e-check donations
+    <h2>Sua doação / Your donation</h2>
+    <p>Atenção, doações podem levar vários minutos para serem concluídas. Por favor não use linguagem ofensiva ou palavrões, pois os comentários das doações são exibidos ao público e serão removidos do site se forem impróprios.
+
+    Note that donations may take several minutes to be collected! Using e-check donations
 		are not recommended, as your donation will be delayed by several days. Please refrain from offensive language or hurtful remarks, all donation comments are screened and will
 		be removed from the website if deemed unacceptable.</p>
     <span style="color:red">
@@ -400,11 +406,19 @@
   <div id="right">
     {% if hasBids %}
     <div id="bidsTab">
-      <h2>Bidding Challenges/Choices</h2>
-      <p>This section allows you to put your donation to one of our many challenges and choices. Find the choice you wish to use (the filter box will help you find it), select it,
+      <h2>Incentivos de Aumento de Dificuldade e Escolha do Público / Bidding Challenges/Choices</h2>
+      <p>Esta seção lhe permite colocar sua doação para alguns dos vários desafios e escolhas. Escolha o incentivo que você deseja colocar (a filter box vai ajudar a encontrá-lo), selecione-o, 
+      e insira o valor da sua doação que será aplicada ao incentivo. Se você deseja escolher um <strong>nome</strong>, você terá que usar a caixa de sugestão de incentivo na esquerda, devido a limitações do software. Você poderá dividir sua doação em até 10 maneiras clicando no link "Adicionar Outro".
+
+      This section allows you to put your donation to one of our many challenges and choices. Find the choice you wish to use (the filter box will help you find it), select it,
       and enter the amount of your donation you want to apply to that choice. If you wish to choose a <strong>name</strong>, you will need to use the bid suggestion box on the left, due to software limitations. You may split your donation up as many as 10 ways by clicking the "Add Another" link. </p>
-      <p>If you aren't sure what to put your money towards, click the 'Group' dropdown and select 'Suggestions', we may periodically add house favorites! (e.g. Runner's Choice)</p>
-      <p>You do <strong>not</strong> need to put your donation towards a prize. You are automatically entered into any prize you are eligible for at the time the donation is
+      <p>Se você não tem certeza sobre em que colocar seu dinheiro, clique no dropdown 'Group' e selecione 'Suggestions', nós iremos adicionar as opções mais escolhidas! (exemplo: Escolha do Runner)
+
+      If you aren't sure what to put your money towards, click the 'Group' dropdown and select 'Suggestions', we may periodically add house favorites! (e.g. Runner's Choice)</p>
+      <p>Você <strong>não</strong> precisa indicar um prêmio ao fazer sua doação. Você automaticamente estará concorrendo a todos os prêmios que você esteja elegível no momento 
+      em que sua doação é recebida por nós. 
+
+      You do <strong>not</strong> need to put your donation towards a prize. You are automatically entered into any prize you are eligible for at the time the donation is
       received by us.</p>
 
       <div id="info">
@@ -438,13 +452,15 @@
 
     {% if hasTicketPrizes %}
     <div id="prizesTab">
-      <h2>Prize Tickets</h2>
-      <p>This section allows you to put your donation towards winning a prize. Select the prize you wish to use (the filter box will help you find it), select it, and enter the amount of your donation you want to apply towards it. You may split your donation up as many as 10 ways by clicking the "Add Another" link. Please note the minimum amounts required to get at least one entry towards the prize.</p>
+      <h2>Tickets para Prêmios / Prize Tickets</h2>
+      <p>Esta seção lhe permite colocar sua doação para tentar ganhar um prêmio. Selecione o prêmio que quiser (use a filter box para encontrá-lo), e insira o valor da sua doação que você deseja aplicar no mesmo. Você pode dividir a sua doação em até 10 maneiras clicando no link "Adicionar Outro". Por favor verifique o valor mínimo correto para conseguir no mínimo uma tentativa para seus prêmios.
+
+      This section allows you to put your donation towards winning a prize. Select the prize you wish to use (the filter box will help you find it), select it, and enter the amount of your donation you want to apply towards it. You may split your donation up as many as 10 ways by clicking the "Add Another" link. Please note the minimum amounts required to get at least one entry towards the prize.</p>
 
       <div id="info">
-        Total Allocated: $<span id="totalprizeallocated"></span> / $<span id="prizedonationtotal"></span>
+        Total Alocado / Total Allocated: $<span id="totalprizeallocated"></span> / $<span id="prizedonationtotal"></span>
         <br />
-        Remaining: $<span id="totalprizeremaining"></span>
+        Restante / Remaining: $<span id="totalprizeremaining"></span>
       </div>
 
       {% for form in prizesform %}
@@ -473,18 +489,18 @@
     {{ prizesform.management_form }}
   </div>
 
-  <p><input type="submit" value="Donate!" /></p>
+  <p><input type="submit" value="Doar / Donate!" /></p>
 </form>
 
 <script>
 $(function() {
-  $('#bidsform div.topleveldonationbidformsetform').formset({'added': onAddBidAssignmentWidget, 'addText': 'Add Another', 'removed': bidsAmountUpdate, prefix: '{{ bidsform.prefix }}', formCssClass: 'dynamic-bidsform'});
-  $('#bidsform div.toplevelprizeticketformsetform').formset({'added': onAddPrizeAssignmentWidget, 'addText': 'Add Another', 'removed': prizeAmountUpdate, prefix: '{{ prizesform.prefix }}', formCssClass: 'dynamic-prizesform'});
+  $('#bidsform div.topleveldonationbidformsetform').formset({'added': onAddBidAssignmentWidget, 'addText': 'Adicionar Outro / Add Another', 'removed': bidsAmountUpdate, prefix: '{{ bidsform.prefix }}', formCssClass: 'dynamic-bidsform'});
+  $('#bidsform div.toplevelprizeticketformsetform').formset({'added': onAddPrizeAssignmentWidget, 'addText': 'Adicionar Outro / Add Another', 'removed': prizeAmountUpdate, prefix: '{{ prizesform.prefix }}', formCssClass: 'dynamic-prizesform'});
 })
 </script>
 
 <div id="footer">
-  <h2>Games Done Quick - Event Tracker</h2>
+  <h2>Brazilians Against Time - Event Tracker</h2>
 </div>
 
 {% endblock %}
